@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Actividad JSONPlaceholder</title>
+<style>
+body { font-family: Arial; margin: 20px; }
+section { border: 1px solid black; padding: 15px; margin-bottom: 20px; }
+button { margin-left: 5px; }
+.post { border: 1px solid gray; padding: 10px; margin-top: 10px; }
+</style>
+</head>
+<body>
+
+<h1>Actividad JSONPlaceholder</h1>
+<p>Consulta datos de un usuario y sus posts.</p>
+
+<!-- Section 1: solicitar datos -->
+<section>
+<h2>1. Datos del usuario</h2>
+<label>ID del usuario (1-10): </label>
+<input type="number" id="inputId" min="1" max="10">
+<button id="btnBuscar">Buscar</button>
+<div id="datosUsuario">
+<p>Ingresa un ID y pulsa Buscar.</p>
+</div>
+</section>
+
+<!-- Section 2: posts del usuario -->
+<section>
+<h2>2. Posts del usuario</h2>
+<div id="listaPosts">
+<p>Aqui apareceran los posts.</p>
+</div>
+</section>
+
+<script>
+const API = 'https://jsonplaceholder.typicode.com';
+const inputId = document.getElementById('inputId');
+const btnBuscar = document.getElementById('btnBuscar');
+const datosUsuario = document.getElementById('datosUsuario');
+const listaPosts = document.getElementById('listaPosts');
+
+async function buscar() {
+  let id = inputId.value;
+  if (!id || id < 1 || id > 10) {
+    datosUsuario.innerHTML = '<p>Ingresa un ID valido entre 1 y 10.</p>';
+    return;
+  }
+
+  datosUsuario.innerHTML = '<p>Cargando usuario...</p>';
+  listaPosts.innerHTML = '<p>Cargando posts...</p>';
+
+  try {
+    let resUser = await fetch(API + '/users/' + id);
+    let user = await resUser.json();
+
+    datosUsuario.innerHTML =
+      '<p><b>ID:</b> ' + user.id + '</p>' +
+      '<p><b>Nombre:</b> ' + user.name + '</p>' +
+      '<p><b>Usuario:</b> ' + user.username + '</p>' +
+      '<p><b>Email:</b> ' + user.email + '</p>' +
+      '<p><b>Telefono:</b> ' + user.phone + '</p>' +
+      '<p><b>Web:</b> ' + user.website + '</p>' +
+      '<p><b>Ciudad:</b> ' + user.address.city + '</p>' +
+      '<p><b>Empresa:</b> ' + user.company.name + '</p>';
+
+    let resPosts = await fetch(API + '/posts?userId=' + id);
+    let posts = await resPosts.json();
+
+    let html = '<p>Total de posts: ' + posts.length + '</p>';
+    posts.forEach(function(p) {
+      html += '<div class="post"><p><b>Post ' + p.id + ':</b> ' + p.title + '</p><p>' + p.body + '</p></div>';
+    });
+    listaPosts.innerHTML = html;
+
+  } catch (e) {
+    datosUsuario.innerHTML = '<p>Error al cargar los datos.</p>';
+    listaPosts.innerHTML = '<p>Error al cargar los posts.</p>';
+  }
+}
+
+btnBuscar.addEventListener('click', buscar);
+</script>
+
+</body>
+</html>
